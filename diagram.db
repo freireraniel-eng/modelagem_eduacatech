@@ -1,0 +1,53 @@
+
+Table alunos {
+  id int [pk, increment]
+  nome varchar(255) [not null]
+  email varchar(150) [not null, unique]
+  data_nascimento date
+  telefone char(14)
+  data_cadastro datetime [default: `CURRENT_TIMESTAMP`]
+}
+
+Table professores {
+  id int [pk, increment]
+  nome varchar(255) [not null]
+  email varchar(150) [not null, unique]
+  telefone char(14)
+  especialidade varchar(100)
+}
+
+Table cursos {
+  id int [pk, increment]
+  nome varchar(255)
+  descricao text
+  carga_horaria int [not null, note: 'CHECK (carga_horaria > 0)']
+  valor decimal(10,2) [not null, note: 'CHECK (valor >= 0)']
+  professor_id int [not null]
+  data_cadastro datetime [default: `CURRENT_TIMESTAMP`]
+}
+
+Table matriculas {
+  id int [pk, increment]
+  aluno_id int [not null]
+  curso_id int [not null]
+  data_matricula datetime [default: `CURRENT_TIMESTAMP`]
+  nota_final decimal(4,2)
+  situacao varchar(20) [not null, default: 'EM_ANDAMENTO', note: 'EM_ANDAMENTO, CONCLUIDA ou CANCELADA']
+
+  indexes {
+    (aluno_id, curso_id) [unique, name: 'uk_aluno_curso']
+  }
+
+  Note: 'CHECK (nota_final BETWEEN 0 AND 10 OR nota_final IS NULL)'
+}
+
+// Professor 1:N Curso
+Ref: cursos.professor_id > professores.id
+
+// Aluno 1:N Matrícula
+Ref: matriculas.aluno_id > alunos.id
+
+// Curso 1:N Matrícula
+Ref: matriculas.curso_id > cursos.id
+
+// Aluno N:N Curso (resolvido pela tabela matriculas)
